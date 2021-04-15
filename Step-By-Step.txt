@@ -1,0 +1,49 @@
+MVC
+
+1- Add libraries to project
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Identity.Web" Version="1.9.0" />
+    <PackageReference Include="Microsoft.Identity.Web.UI" Version="1.9.0" />
+  </ItemGroup>
+
+2- Startup.ConfigureServices
+    services.AddControllersWithViews()
+        .AddMicrosoftIdentityUI();
+
+    services.AddMicrosoftIdentityWebAppAuthentication(Configuration, "AzureAdB2C");
+
+3- Startup.Configure
+    app.UseAuthentication();
+
+4- Add Views/Shared/_LoginPartial.cshtml
+
+    @using Microsoft.Identity.Web
+    @if (User.Identity.IsAuthenticated)
+    {
+        <ul class="nav navbar-nav navbar-right">
+            <li class="navbar-text">Hello @User.GetDisplayName()!</li>
+            <li><a asp-area="MicrosoftIdentity" asp-controller="Account" asp-action="SignOut">Sign out</a></li>
+        </ul>
+    }
+    else
+    {
+        <ul class="nav navbar-nav navbar-right">
+            <li><a asp-area="MicrosoftIdentity" asp-controller="Account" asp-action="SignIn">Sign in</a></li>
+        </ul>
+    }
+
+5- Modify Views/Shared/_Layout.cshtml
+
+    <partial name="_LoginPartial" />
+
+6- Add callback url and grab settings
+    https://localhost:5001/signin-oidc
+
+7- Add settings
+
+  "AzureAdB2C": {
+    "Instance": "https://linkedinazureadb2c.b2clogin.com",
+    "ClientId": "f4adfa19-2162-449a-a083-a2c7a1834aec",
+    "Domain": "linkedinazureadb2c.onmicrosoft.com",
+    "SignUpSignInPolicyId": "B2C_1_InicioSesionConRegistro"
+  }
