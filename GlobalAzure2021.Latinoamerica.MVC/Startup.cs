@@ -28,7 +28,9 @@ namespace GlobalAzure2021.Latinoamerica.MVC
             services.AddControllersWithViews()
                 .AddMicrosoftIdentityUI();
 
-            services.AddMicrosoftIdentityWebAppAuthentication(Configuration, "AzureAdB2C");
+            services.AddMicrosoftIdentityWebAppAuthentication(Configuration, "AzureAdB2C")
+                .EnableTokenAcquisitionToCallDownstreamApi(new string[] { Configuration["Api:Scope"] })
+                .AddInMemoryTokenCaches();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
