@@ -25,7 +25,10 @@ namespace GlobalAzure2021.Latinoamerica.MVC
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews();
+            services.AddControllersWithViews()
+                .AddMicrosoftIdentityUI();
+
+            services.AddMicrosoftIdentityWebAppAuthentication(Configuration, "AzureAdB2C");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -45,7 +48,7 @@ namespace GlobalAzure2021.Latinoamerica.MVC
             app.UseStaticFiles();
 
             app.UseRouting();
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
