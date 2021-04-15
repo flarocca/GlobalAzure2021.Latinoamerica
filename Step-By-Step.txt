@@ -47,3 +47,125 @@ MVC
     "Domain": "linkedinazureadb2c.onmicrosoft.com",
     "SignUpSignInPolicyId": "B2C_1_InicioSesionConRegistro"
   }
+
+API
+
+1- Add libraries to project
+
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.5" />
+    <PackageReference Include="Microsoft.Identity.Web" Version="1.9.0" />
+
+2- Startup.ConfigureServices
+
+    services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddMicrosoftIdentityWebApi(options =>
+            {
+                Configuration.Bind("AzureAdB2C", options);
+
+                options.TokenValidationParameters.NameClaimType = "name";
+            },
+            options => { Configuration.Bind("AzureAdB2C", options); });
+
+3- Startup.Configure
+    app.UseAuthentication();
+
+4- Add Authorize to controller
+    [Authorize]
+
+5- Create new App Registration: WebApi
+
+6- Create a scope on WebApi app registration
+
+7- Add Newtonsoft.Json to WebApp
+
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+
+8- Add settings to (web app)
+
+  "AzureAdB2C": {
+    "Instance": "https://linkedinazureadb2c.b2clogin.com",
+    "ClientId": "c42c9c12-4ab8-4e60-8a94-81c99122fa5d",
+    "Domain": "linkedinazureadb2c.onmicrosoft.com",
+    "SignUpSignInPolicyId": "B2C_1_InicioSesionConRegistro"
+  }
+
+9- Go to the Web App registration and create a secret
+
+10- Add the client secret to AzureADB2C section (web app)
+
+  "AzureAdB2C": {
+    "Instance": "https://linkedinazureadb2c.b2clogin.com",
+    "ClientId": "f4adfa19-2162-449a-a083-a2c7a1834aec",
+    "Domain": "linkedinazureadb2c.onmicrosoft.com",
+    "SignUpSignInPolicyId": "B2C_1_InicioSesionConRegistro"
+    "ClientSecret": "55UGv.05Svno9kR~6ycqzmJheh~E.3C68h"
+  }
+  
+11- Add API settings section (web app)
+  
+  "Api": {
+    "BaseUrl": "https://localhost:5002/",
+    "Scope": "https://linkedinazureadb2c.onmicrosoft.com/c42c9c12-4ab8-4e60-8a94-81c99122fa5d/Values.Read"
+  }
+
+12- Create WeatherForecastViewModel view model (web app)
+
+13- Create a weather controller (web app)
+
+14- Add API suuport Startup.ConfigureServices
+
+15- Add Weather action to navbar, _Layout.cshtml (web app)
+
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-controller="Weather" asp-action="Index">Weather</a>
+    </li>
+
+16- Add a Views/Weather/Index.cshtml view (web app)
+
+    @model IEnumerable<GlobalAzure2021.Latinoamerica.MVC.Models.WeatherForecastViewModel>
+
+    @{
+        ViewData["Title"] = "Weather";
+    }
+
+    <h1>Weather</h1>
+
+    <p>
+        <a asp-action="Create">Create New</a>
+    </p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Date)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.TemperatureC)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.TemperatureF)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Summary)
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+    @foreach (var item in Model) {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Date)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TemperatureC)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TemperatureF)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Summary)
+                </td>
+            </tr>
+    }
+        </tbody>
+    </table>
