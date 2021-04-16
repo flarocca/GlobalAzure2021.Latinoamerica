@@ -1,171 +1,140 @@
-MVC
+MVC Integration
 
-1- Add libraries to project
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Identity.Web" Version="1.9.0" />
-    <PackageReference Include="Microsoft.Identity.Web.UI" Version="1.9.0" />
-  </ItemGroup>
+    1- Add libraries to project
 
-2- Startup.ConfigureServices
-    services.AddControllersWithViews()
-        .AddMicrosoftIdentityUI();
+        <ItemGroup>
+            <PackageReference Include="Microsoft.Identity.Web" Version="1.9.0" />
+            <PackageReference Include="Microsoft.Identity.Web.UI" Version="1.9.0" />
+        </ItemGroup>
 
-    services.AddMicrosoftIdentityWebAppAuthentication(Configuration, "AzureAdB2C");
+    2- Startup.ConfigureServices
 
-3- Startup.Configure
-    app.UseAuthentication();
+        services.AddControllersWithViews()
+            .AddMicrosoftIdentityUI();
 
-4- Add Views/Shared/_LoginPartial.cshtml
+        services.AddMicrosoftIdentityWebAppAuthentication(Configuration, "AzureAdB2C");
 
-    @using Microsoft.Identity.Web
-    @if (User.Identity.IsAuthenticated)
-    {
-        <ul class="nav navbar-nav navbar-right">
-            <li class="navbar-text">Hello @User.GetDisplayName()!</li>
-            <li><a asp-area="MicrosoftIdentity" asp-controller="Account" asp-action="SignOut">Sign out</a></li>
-        </ul>
-    }
-    else
-    {
-        <ul class="nav navbar-nav navbar-right">
-            <li><a asp-area="MicrosoftIdentity" asp-controller="Account" asp-action="SignIn">Sign in</a></li>
-        </ul>
-    }
+    3- Startup.Configure
 
-5- Modify Views/Shared/_Layout.cshtml
+        app.UseAuthentication();
 
-    <partial name="_LoginPartial" />
+    4- Add Views/Shared/_LoginPartial.cshtml
 
-6- Add callback url and grab settings
-    https://localhost:5001/signin-oidc
+        @using Microsoft.Identity.Web
+        @if (User.Identity.IsAuthenticated)
+        {
+            <ul class="nav navbar-nav navbar-right">
+                <li class="navbar-text">Hello @User.GetDisplayName()!</li>
+                <li><a asp-area="MicrosoftIdentity" asp-controller="Account" asp-action="SignOut">Sign out</a></li>
+            </ul>
+        }
+        else
+        {
+            <ul class="nav navbar-nav navbar-right">
+                <li><a asp-area="MicrosoftIdentity" asp-controller="Account" asp-action="SignIn">Sign in</a></li>
+            </ul>
+        }
 
-7- Add settings
+    5- Modify Views/Shared/_Layout.cshtml
 
-  "AzureAdB2C": {
-    "Instance": "https://linkedinazureadb2c.b2clogin.com",
-    "ClientId": "f4adfa19-2162-449a-a083-a2c7a1834aec",
-    "Domain": "linkedinazureadb2c.onmicrosoft.com",
-    "SignUpSignInPolicyId": "B2C_1_InicioSesionConRegistro"
-  }
+        <partial name="_LoginPartial" />
 
-API
+    6- Add callback url and grab settings
+        https://localhost:5001/signin-oidc
 
-1- Add libraries to project
+    7- Add settings
 
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.5" />
-    <PackageReference Include="Microsoft.Identity.Web" Version="1.9.0" />
+        "AzureAdB2C": {
+            "Instance": "https://linkedinazureadb2c.b2clogin.com",
+            "ClientId": "f4adfa19-2162-449a-a083-a2c7a1834aec",
+            "Domain": "linkedinazureadb2c.onmicrosoft.com",
+            "SignUpSignInPolicyId": "B2C_1_InicioSesionConRegistro"
+        }
 
-2- Startup.ConfigureServices
 
-    services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddMicrosoftIdentityWebApi(options =>
+
+
+API Integration
+
+    API Project
+
+        1- Add libraries to project
+
+            <PackageReference Include="Microsoft.Identity.Web" Version="1.9.0" />
+
+        2- Startup.ConfigureServices
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                    .AddMicrosoftIdentityWebApi(options =>
+                    {
+                        Configuration.Bind("AzureAdB2C", options);
+
+                        options.TokenValidationParameters.NameClaimType = "name";
+                    },
+                    options => { Configuration.Bind("AzureAdB2C", options); });
+
+        3- Startup.Configure
+            app.UseAuthentication();
+
+        4- Create new App Registration: WebApi
+
+        5- Create a scope on WebApi app registration
+
+        6- Grab the clientId of this new App and add settings
+
+        "AzureAdB2C": {
+            "Instance": "https://linkedinazureadb2c.b2clogin.com",
+            "ClientId": "c42c9c12-4ab8-4e60-8a94-81c99122fa5d",
+            "Domain": "linkedinazureadb2c.onmicrosoft.com",
+            "SignUpSignInPolicyId": "B2C_1_InicioSesionConRegistro"
+        }
+
+        7- Go to the Web App registration and create a secret
+
+        8- Add the client secret to AzureADB2C section (web app)
+
+        "AzureAdB2C": {
+            ...
+            "ClientSecret": "55UGv.05Svno9kR~6ycqzmJheh~E.3C68h"
+        }
+  
+    MVC  Project
+    
+        9- Add the Scope to the API settings section (web app)
+        
+        "Api": {
+            ...
+            "Scope": "https://linkedinazureadb2c.onmicrosoft.com/c42c9c12-4ab8-4e60-8a94-81c99122fa5d/Values.Read"
+        }
+
+        10- Add API support Startup.ConfigureServices
+
+            .EnableTokenAcquisitionToCallDownstreamApi(new string[] { Configuration["Api:Scope"] })
+            .AddInMemoryTokenCaches();
+
+        11- Inject The ITokenAcquisition service to the Weather controller
+
+                private readonly ITokenAcquisition _tokenAcquisition;
+
+                public WeatherController(
+                    ITokenAcquisition tokenAcquisition,
+                    HttpClient httpClient,
+                    IConfiguration configuration)
+                {
+                    _tokenAcquisition = tokenAcquisition;
+                    _httpClient = httpClient;
+                    _configuration = configuration;
+                }
+
+        12- Add method PrepareAuthenticatedClientAsync()
+
+            private async Task PrepareAuthenticatedClientAsync()
             {
-                Configuration.Bind("AzureAdB2C", options);
+                var accessToken = await _tokenAcquisition.GetAccessTokenForUserAsync(new[] { _configuration["Api:Scope"] });
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+                _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            }
 
-                options.TokenValidationParameters.NameClaimType = "name";
-            },
-            options => { Configuration.Bind("AzureAdB2C", options); });
-
-3- Startup.Configure
-    app.UseAuthentication();
-
-4- Add Authorize to controller
-    [Authorize]
-
-5- Create new App Registration: WebApi
-
-6- Create a scope on WebApi app registration
-
-7- Add Newtonsoft.Json to WebApp
-
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-
-8- Add settings to (web app)
-
-  "AzureAdB2C": {
-    "Instance": "https://linkedinazureadb2c.b2clogin.com",
-    "ClientId": "c42c9c12-4ab8-4e60-8a94-81c99122fa5d",
-    "Domain": "linkedinazureadb2c.onmicrosoft.com",
-    "SignUpSignInPolicyId": "B2C_1_InicioSesionConRegistro"
-  }
-
-9- Go to the Web App registration and create a secret
-
-10- Add the client secret to AzureADB2C section (web app)
-
-  "AzureAdB2C": {
-    "Instance": "https://linkedinazureadb2c.b2clogin.com",
-    "ClientId": "f4adfa19-2162-449a-a083-a2c7a1834aec",
-    "Domain": "linkedinazureadb2c.onmicrosoft.com",
-    "SignUpSignInPolicyId": "B2C_1_InicioSesionConRegistro"
-    "ClientSecret": "55UGv.05Svno9kR~6ycqzmJheh~E.3C68h"
-  }
-  
-11- Add API settings section (web app)
-  
-  "Api": {
-    "BaseUrl": "https://localhost:5002/",
-    "Scope": "https://linkedinazureadb2c.onmicrosoft.com/c42c9c12-4ab8-4e60-8a94-81c99122fa5d/Values.Read"
-  }
-
-12- Create WeatherForecastViewModel view model (web app)
-
-13- Create a weather controller (web app)
-
-14- Add API suuport Startup.ConfigureServices
-
-15- Add Weather action to navbar, _Layout.cshtml (web app)
-
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-controller="Weather" asp-action="Index">Weather</a>
-    </li>
-
-16- Add a Views/Weather/Index.cshtml view (web app)
-
-    @model IEnumerable<GlobalAzure2021.Latinoamerica.MVC.Models.WeatherForecastViewModel>
-
-    @{
-        ViewData["Title"] = "Weather";
-    }
-
-    <h1>Weather</h1>
-
-    <p>
-        <a asp-action="Create">Create New</a>
-    </p>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>
-                    @Html.DisplayNameFor(model => model.Date)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.TemperatureC)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.TemperatureF)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Summary)
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-    @foreach (var item in Model) {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Date)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.TemperatureC)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.TemperatureF)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Summary)
-                </td>
-            </tr>
-    }
-        </tbody>
-    </table>
+        13- Within index, call PrepareAuthenticatedClientAsync
+        
+            await PrepareAuthenticatedClientAsync();
