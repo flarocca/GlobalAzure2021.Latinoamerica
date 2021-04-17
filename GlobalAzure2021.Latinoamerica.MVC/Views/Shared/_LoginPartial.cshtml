@@ -1,0 +1,15 @@
+﻿@using Microsoft.Identity.Web
+@if (User.Identity.IsAuthenticated)
+{
+    <ul class="nav navbar-nav navbar-right">
+        <li class="navbar-text">Hello @User.GetDisplayName()!</li>
+        <li>Sign out (Out of scope)</li>
+    </ul>
+}
+else
+{
+    <ul class="nav navbar-nav navbar-right">
+        @*<li><a asp-area="MicrosoftIdentity" asp-controller="Account" asp-action="SignIn">Sign in</a></li>*@
+        <li>Sign in</li>
+    </ul>
+}

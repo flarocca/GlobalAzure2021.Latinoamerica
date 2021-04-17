@@ -18,28 +18,8 @@ MVC Integration
 
         app.UseAuthentication();
 
-    4- Add Views/Shared/_LoginPartial.cshtml
-
-        @using Microsoft.Identity.Web
-        @if (User.Identity.IsAuthenticated)
-        {
-            <ul class="nav navbar-nav navbar-right">
-                <li class="navbar-text">Hello @User.GetDisplayName()!</li>
-                <li><a asp-area="MicrosoftIdentity" asp-controller="Account" asp-action="SignOut">Sign out</a></li>
-            </ul>
-        }
-        else
-        {
-            <ul class="nav navbar-nav navbar-right">
-                <li><a asp-area="MicrosoftIdentity" asp-controller="Account" asp-action="SignIn">Sign in</a></li>
-            </ul>
-        }
-
-    5- Modify Views/Shared/_Layout.cshtml
-
-        <partial name="_LoginPartial" />
-
     6- Add callback url and grab settings
+
         https://localhost:5001/signin-oidc
 
     7- Add settings
@@ -89,6 +69,10 @@ API Integration
             "SignUpSignInPolicyId": "B2C_1_InicioSesionConRegistro"
         }
 
+        7- Add Authorize
+  
+    MVC  Project
+    
         7- Go to the Web App registration and create a secret
 
         8- Add the client secret to AzureADB2C section (web app)
@@ -97,9 +81,7 @@ API Integration
             ...
             "ClientSecret": "55UGv.05Svno9kR~6ycqzmJheh~E.3C68h"
         }
-  
-    MVC  Project
-    
+
         9- Add the Scope to the API settings section (web app)
         
         "Api": {

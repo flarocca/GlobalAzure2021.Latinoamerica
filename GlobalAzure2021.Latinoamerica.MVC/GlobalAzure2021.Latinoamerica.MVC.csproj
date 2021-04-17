@@ -4,4 +4,11 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+
+    <PackageReference Include="Microsoft.Identity.Web" Version="1.9.0" />
+    <PackageReference Include="Microsoft.Identity.Web.UI" Version="1.9.0" />
+  </ItemGroup>
+
 </Project>
